@@ -2,6 +2,7 @@
     "files.associations": {
         "StandardHypoTestDemo.C": "cpp",
         "CountingModel.C": "cpp",
-        "prova.C": "cpp"
+        "prova.C": "cpp",
+        "opera.C": "cpp"
     }
 }
