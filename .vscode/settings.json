@@ -1,5 +1,7 @@
 {
     "files.associations": {
-        "StandardHypoTestDemo.C": "cpp"
+        "StandardHypoTestDemo.C": "cpp",
+        "CountingModel.C": "cpp",
+        "prova.C": "cpp"
     }
 }
