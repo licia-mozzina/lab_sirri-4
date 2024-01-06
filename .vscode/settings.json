@@ -3,6 +3,7 @@
         "StandardHypoTestDemo.C": "cpp",
         "CountingModel.C": "cpp",
         "prova.C": "cpp",
-        "opera.C": "cpp"
+        "opera.C": "cpp",
+        "tut.C": "cpp"
     }
 }
