@@ -4,6 +4,8 @@
         "CountingModel.C": "cpp",
         "prova.C": "cpp",
         "opera.C": "cpp",
-        "tut.C": "cpp"
+        "tut.C": "cpp",
+        "StandardProfileLikelihoodDemo.C": "cpp",
+        "StandardFeldmanCousinsDemo.C": "cpp"
     }
 }

@@ -119,7 +119,7 @@ int higgs_CMS() {
 
     //Writing fit results to txt file 
     ofstream myfile;
-    myfile.open("minos_fit.txt");
+    myfile.open("higgs_CMS_fit.txt");
     result->printMultiline(myfile, 1111, kTRUE);
     myfile.close();
 
@@ -131,8 +131,9 @@ int higgs_CMS() {
     ModelConfig mc("ModelConfig", &ws);
 
     ws.import(model);
-    //mc.SetParametersOfInterest(RooArgList(*ws.var("model"), *ws.var("inv_mass"), *ws.var("m_higgs")));
-   // mc.SetNuisanceParameters(*ws.var("f_s"));
+    ws.import(inv_mass_dh);
+    mc.SetParametersOfInterest(RooArgSet(*ws.pdf("model"), *ws.var("inv_mass"), *ws.var("m_higgs")));
+    mc.SetNuisanceParameters(*ws.var("f_s"));
     ws.import(mc);
 
     // Direi che non servono con macro root apposta
