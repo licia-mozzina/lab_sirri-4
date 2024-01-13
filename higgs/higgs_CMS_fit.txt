@@ -1,15 +1,15 @@
 
-  RooFitResult: minimized FCN value: 802.409, estimated distance to minimum: 8.02221e-08
+  RooFitResult: minimized FCN value: 438.008, estimated distance to minimum: 7.26257e-08
                 covariance matrix quality: Full, accurate covariance matrix
                 Status : MINIMIZE=0 HESSE=0 
 
     Constant Parameter    Value     
   --------------------  ------------
-                  f_DY    1.1355e-01
-               f_ttbar    0.0000e+00
+                  f_DY    1.0396e-01
+               f_ttbar    1.8855e-03
 
     Floating Parameter  InitialValue    FinalValue +/-  Error     GblCorr.
   --------------------  ------------  --------------------------  --------
-                   f_s    5.0000e-01    2.7296e-02 +/-  1.41e-02  <none>
-               m_higgs    1.2500e+02    1.2371e+02 +/-  1.49e+00  <none>
+                   f_s    5.0000e-01    7.7573e-02 +/-  3.73e-02  <none>
+               m_higgs    1.2500e+02    1.2383e+02 +/-  1.40e+00  <none>
 

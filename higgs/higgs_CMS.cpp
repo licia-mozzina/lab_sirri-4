@@ -21,8 +21,11 @@ using namespace RooStats;
 
 int higgs_CMS() {
     //Declaring the observable
-    RooRealVar inv_mass ("inv_mass", "4_leptons_invariant_mass_distr", 70., 180.);
-    inv_mass.setBins(37);
+    Double_t low_lim = 70.;
+    Double_t upp_lim = 180.;
+    RooRealVar inv_mass ("inv_mass", "4_leptons_invariant_mass_distr", low_lim, upp_lim);
+    Int_t n_bins = 37;
+    inv_mass.setBins(n_bins);
 
     // Importing the data
     RooDataHist inv_mass_dh ("inv_mass_dh", "histo_inv_mass", inv_mass);
@@ -31,32 +34,48 @@ int higgs_CMS() {
     RooDataHist DY_dh("DY_dh", "histo_DY", inv_mass);  
 
     ifstream f1("_cms_higgs_data.txt");
-    Double_t v, w; // basterebbe una dichiarazione, poi cambiano sempre valore, anche per nome file
+    Double_t v, w; 
     while(!f1.eof()) {
         f1 >> v >> w;
-        inv_mass.setVal(v);
-        inv_mass_dh.set(inv_mass, w);
+        if (v > low_lim && v < upp_lim) { // double-checking for underflow/overflow values
+            inv_mass.setVal(v);
+            inv_mass_dh.set(inv_mass, w);
+        } else {
+            continue;
+        }
     }
 
     ifstream f2("_cms_higgs_TTbarto4l.txt");
     while(!f2.eof()) {
         f2 >> v >> w;
-        inv_mass.setVal(v);
-        ttbar_dh.set(inv_mass, w);
+        if (v > low_lim && v < upp_lim) {
+            inv_mass.setVal(v);
+            ttbar_dh.set(inv_mass, w);
+        } else {
+            continue;
+        }
     }
   
     ifstream f3("_cms_higgs_ZZto4l.txt");
     while(!f3.eof()) {
         f3 >> v >> w;
-        inv_mass.setVal(v);
-        ZZ_dh.set(inv_mass, w);
+        if (v > low_lim && v < upp_lim) {
+            inv_mass.setVal(v);
+            ZZ_dh.set(inv_mass, w);
+        } else {
+            continue;
+        }
     }
 
     ifstream f4("_cms_higgs_DYto4l.txt");
     while(!f4.eof()) {
         f4 >> v >> w;
-        inv_mass.setVal(v);
-        DY_dh.set(inv_mass, w);
+        if (v > low_lim && v < upp_lim) {
+            inv_mass.setVal(v);
+            DY_dh.set(inv_mass, w);
+        } else {
+            continue;
+        }
     }
     
     //Building background distributions from data
@@ -74,18 +93,19 @@ int higgs_CMS() {
 
 
     RooAddPdf bkg_model ("bkg_model", "background_model", RooArgList(hpdf_ttbar, hpdf_DY, hpdf_ZZ), RooArgList(f_ttbar, f_DY));
-    RooPlot *higgs1 = inv_mass.frame();
-    ttbar_dh.plotOn(higgs1, Name("Data"));
-    bkg_model.plotOn(higgs1, Name("Model Fit")); 
-    bkg_model.plotOn(higgs1, Components(hpdf_ttbar), LineColor(kViolet-1), Name("tt"));
-    bkg_model.plotOn(higgs1, Components(hpdf_DY), LineColor(kViolet-1), Name("dy"));
-    bkg_model.plotOn(higgs1, Components(hpdf_ZZ), LineColor(kMagenta), Name("zz"));
 
-    TCanvas *c = new TCanvas("c", "HIGGS", 1600, 800);
-    higgs1->Draw();
+    // RooPlot *higgs1 = inv_mass.frame();
+    // ttbar_dh.plotOn(higgs1, Name("Data"));
+    // bkg_model.plotOn(higgs1, Name("Model Fit")); 
+    // bkg_model.plotOn(higgs1, Components(hpdf_ttbar), LineColor(kViolet-1), Name("tt"));
+    // bkg_model.plotOn(higgs1, Components(hpdf_DY), LineColor(kViolet-1), Name("dy"));
+    // bkg_model.plotOn(higgs1, Components(hpdf_ZZ), LineColor(kMagenta), Name("zz"));
+
+    // TCanvas *c = new TCanvas("c", "HIGGS", 1600, 800);
+    // higgs1->Draw();
 
     // Building signal + background model
-    RooRealVar m_higgs ("m_higgs", "Higgs_mass", 125., 110., 140);
+    RooRealVar m_higgs ("m_higgs", "Higgs_mass", 125., 110., 140.);
     RooConstVar sigma_higgs ("sigma_higgs", "Higgs_mass_sigma", 3.); //fixed to 3 GeV
     RooRealVar f_s ("f_s", "signal_fraction", 0.5, 0., 1.);
     RooGaussian gaus_higgs ("gaus_higgs", "higgs_signal_distr", inv_mass, m_higgs, sigma_higgs);
@@ -113,7 +133,7 @@ int higgs_CMS() {
     leg1->AddEntry("Model Fit", "Fit function", "LP");
    
     leg1->Draw("SAME");
-    c1->Print("higgs.png");    
+    c1->Print("higgs.png");  
 
    // result->Print("v"); 
 
@@ -141,6 +161,10 @@ int higgs_CMS() {
     // RooAbsReal* pll = ll->createProfile(m_higgs);
 
     ws.writeToFile("higgs_CMS.root", true);
+
+    for (Int_t i = 0; i < n_bins; ++i) {
+        cout << inv_mass_dh.weight(i) << '\n';
+    }
 
     return 0;
 }
