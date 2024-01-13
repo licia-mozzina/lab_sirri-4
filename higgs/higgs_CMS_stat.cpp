@@ -20,7 +20,7 @@ using namespace RooFit;
 using namespace RooStats;
 
 // Choose between profile likelihood calculator, 
-int higgs_CMS(Int_t mode = 1) {
+int higgs_CMS_stat(Int_t mode = 1) {
     //Declaring the observable
     Double_t low_lim = 70.;
     Double_t upp_lim = 180.;
@@ -139,13 +139,13 @@ int higgs_CMS(Int_t mode = 1) {
     leg1->AddEntry("Model Fit", "Signal + Background Fit", "LP");
    
     leg1->Draw("SAME");
-    c1->Print("higgs.png");  
+    c1->Print("higgs_stat.png");  
 
    // result->Print("v"); 
 
     //Writing fit results to txt file 
     ofstream myfile;
-    myfile.open("higgs_CMS_fit.txt");
+    myfile.open("higgs_CMS_stat_fit.txt");
     result->printMultiline(myfile, 1111, kTRUE);
     myfile.close();
 
@@ -170,7 +170,7 @@ int higgs_CMS(Int_t mode = 1) {
 
     ws.import(mc);
 
-    ws.writeToFile("higgs_CMS.root", true);
+    ws.writeToFile("higgs_CMS_stat.root", true);
 
     ProfileLikelihoodCalculator plc(inv_mass_dh,mc);
     plc.SetConfidenceLevel(0.95); // 90% interval
