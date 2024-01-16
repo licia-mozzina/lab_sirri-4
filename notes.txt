@@ -1,1 +1,1 @@
- StandardHypoTestDemo("OPERA_1.root", "w", "model_constraint", "", "data", 2, 3, 1000, true)
+ StandardHypoTestDemo("OPERA_1.root", "w", "ModelConfig", "", "data", 2, 3, 1000, true)

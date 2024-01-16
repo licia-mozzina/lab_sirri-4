@@ -19,8 +19,9 @@
 using namespace RooFit;
 using namespace RooStats;
 
-// Choose between profile likelihood calculator, 
-int higgs_CMS_stat(Int_t mode = 1) {
+// Choose between profile likelihood calculator + fc = 1
+// or pvalues = 2 
+int higgs_CMS_pvalue(Int_t mode = 1) {
     //Declaring the observable
     Double_t low_lim = 70.;
     Double_t upp_lim = 180.;
@@ -95,16 +96,6 @@ int higgs_CMS_stat(Int_t mode = 1) {
 
     RooAddPdf bkg_model ("bkg_model", "background_model", RooArgList(hpdf_ttbar, hpdf_DY, hpdf_ZZ), RooArgList(f_ttbar, f_DY));
 
-    // RooPlot *higgs1 = inv_mass.frame();
-    // ttbar_dh.plotOn(higgs1, Name("Data"));
-    // bkg_model.plotOn(higgs1, Name("Model Fit")); 
-    // bkg_model.plotOn(higgs1, Components(hpdf_ttbar), LineColor(kViolet-1), Name("tt"));
-    // bkg_model.plotOn(higgs1, Components(hpdf_DY), LineColor(kViolet-1), Name("dy"));
-    // bkg_model.plotOn(higgs1, Components(hpdf_ZZ), LineColor(kMagenta), Name("zz"));
-
-    // TCanvas *c = new TCanvas("c", "HIGGS", 1600, 800);
-    // higgs1->Draw();
-
     // Building signal + background model
     RooRealVar m_higgs ("m_higgs", "Higgs_mass", 125., 110., 140.);
     RooConstVar sigma_higgs ("sigma_higgs", "Higgs_mass_sigma", 3.); //fixed to 3 GeV
@@ -145,35 +136,37 @@ int higgs_CMS_stat(Int_t mode = 1) {
 
     //Writing fit results to txt file 
     ofstream myfile;
-    myfile.open("higgs_CMS_stat_fit.txt");
+    myfile.open("higgs_CMS_stat_pvalue.txt");
     result->printMultiline(myfile, 1111, kTRUE);
     myfile.close();
 
 
 
-    // Creating the ModelConfig for the 95% confidence interval
+    // Creating the ModelConfig for the 
     RooWorkspace ws ("ws", "Workspace");
 
     ModelConfig mc ("mc", "ModelConfig", &ws);
 
     ws.import(model);
-    ws.import(inv_mass_dh);
-//    mc.SetParametersOfInterest(RooArgSet(*ws.pdf("model"), *ws.var("inv_mass"), *ws.var("m_higgs")));
-//    mc.SetNuisanceParameters(*ws.var("f_s"));
-
     mc.SetPdf(*ws.pdf("model"));
+    mc.SetObservables("inv_mass");
+    ws.import(inv_mass_dh);
+
+
+
+    if (mode == 1) {
     ws.defineSet("POI","m_higgs");
     ws.defineSet("nuisP","f_s"); 
-    mc.SetParametersOfInterest(*ws.var("m_higgs"));
-    mc.SetNuisanceParameters(*ws.var("f_s"));
-    mc.SetObservables("inv_mass");
+    mc.SetParametersOfInterest(*ws.set("POI"));
+    mc.SetNuisanceParameters(*ws.set("nuisP"));
 
     ws.import(mc);
 
-    ws.writeToFile("higgs_CMS_stat.root", true);
+    ws.writeToFile("higgs_CMS_pl_fc.root", true);
 
+    // Profile Likelihood 95% confidence interval
     ProfileLikelihoodCalculator plc(inv_mass_dh,mc);
-    plc.SetConfidenceLevel(0.95); // 90% interval
+    plc.SetConfidenceLevel(0.95); 
     LikelihoodInterval* interval = plc.GetInterval();
 
     RooRealVar* firstPOI = (RooRealVar*) mc.GetParametersOfInterest()->first();
@@ -181,6 +174,31 @@ int higgs_CMS_stat(Int_t mode = 1) {
     double upperLimit = interval->UpperLimit(*firstPOI);
 
     cout << "\n95 % interval on " <<firstPOI->GetName()<<" is : ["<<     lowerLimit << ", "<<     upperLimit <<"] "<<endl; 
+
+    //FeldmanCousins
+    FeldmanCousins fc (inv_mass_dh, mc);
+    //fc.SetConfidenceLevel(0.90);
+    fc.SetPdf(model);
+    fc.SetData(inv_mass_dh); 
+    fc.SetParameters(m_higgs);
+    fc.UseAdaptiveSampling(true);
+    fc.FluctuateNumDataEntries(false);
+    fc.SetNBins(100); // number of points to test per parameter
+    fc.SetTestSize(.1);
+    cout <<  fc.GetInterval() << endl;
+    }
+
+    else if (mode == 2) {
+    ws.defineSet("POI","f_s");
+    ws.defineSet("nuisP","m_higgs"); 
+    mc.SetParametersOfInterest(*ws.set("POI"));
+    mc.SetNuisanceParameters(*ws.set("nuisP"));
+
+    ws.import(mc);
+
+    ws.writeToFile("higgs_CMS_pvalue.root", true);
+
+    }
 
     return 0;
 }

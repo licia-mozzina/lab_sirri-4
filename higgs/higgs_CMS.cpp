@@ -14,6 +14,9 @@
 #include "TH2.h"
 #include "TStyle.h"
 
+#include "RooStats/ModelConfig.h"
+#include "RooStats/FeldmanCousins.h"
+
 #include <iostream>
 
 using namespace RooFit;
@@ -38,7 +41,9 @@ int higgs_CMS(Int_t mode = 1) {
     Double_t v, w; 
     while(!f1.eof()) {
         f1 >> v >> w;
-        if (v > low_lim && v < upp_lim) { // double-checking for underflow/overflow values
+        if (v > low_lim && v < upp_lim) { // double-checking for underflow/overflow values 
+                                            // anche perchè altrimenti per n_bin < 37 eof salta ad ultimo valore  
+                                            // e lo assegna due volte a v prima di uscire dal loop
             inv_mass.setVal(v);
             inv_mass_dh.set(inv_mass, w);
         } else {
@@ -151,7 +156,7 @@ int higgs_CMS(Int_t mode = 1) {
 
 
 
-    // Creating the ModelConfig for the 95% confidence interval
+    // Creating the ModelConfig 
     RooWorkspace ws ("ws", "Workspace");
 
     ModelConfig mc ("mc", "ModelConfig", &ws);
@@ -172,6 +177,8 @@ int higgs_CMS(Int_t mode = 1) {
 
     ws.writeToFile("higgs_CMS.root", true);
 
+
+    //Profile Likelihood 95% confidence interval  
     ProfileLikelihoodCalculator plc(inv_mass_dh,mc);
     plc.SetConfidenceLevel(0.95); // 90% interval
     LikelihoodInterval* interval = plc.GetInterval();
@@ -181,6 +188,22 @@ int higgs_CMS(Int_t mode = 1) {
     double upperLimit = interval->UpperLimit(*firstPOI);
 
     cout << "\n95 % interval on " <<firstPOI->GetName()<<" is : ["<<     lowerLimit << ", "<<     upperLimit <<"] "<<endl; 
+
+    //FeldmanCousins
+    FeldmanCousins fc (inv_mass_dh, mc);
+    //fc.SetConfidenceLevel(0.90);        // quello sopra lo definisce per tutti 
+    fc.SetPdf(model);
+    fc.SetData(inv_mass_dh); 
+    fc.SetParameters(m_higgs);
+    fc.UseAdaptiveSampling(true);
+    fc.FluctuateNumDataEntries(false);
+    fc.SetNBins(100); // number of points to test per parameter
+    fc.SetTestSize(.1);
+    ConfInterval * fcint = fc.GetInterval();
+
+    
+
+
 
     return 0;
 }
