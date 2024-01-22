@@ -20,7 +20,7 @@
 using namespace RooFit;
 using namespace RooStats;
 
-int higgs_CMS(Int_t mode = 1) {
+int higgs_CMS() {
     //Declaring the observable
     Double_t low_lim = 70.;
     Double_t upp_lim = 180.;
