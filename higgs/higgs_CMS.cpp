@@ -114,8 +114,9 @@ int higgs_CMS(Int_t mode = 1) {
     RooRealVar m_higgs ("m_higgs", "Higgs_mass", 125., 110., 140.);
     RooConstVar sigma_higgs ("sigma_higgs", "Higgs_mass_sigma", 3.); //fixed to 3 GeV
     RooRealVar f_s ("f_s", "signal_fraction", 0.5, 0., 1.);
+    RooFormulaVar f_b ("f_b", "1 -@0", f_s);
     RooGaussian gaus_higgs ("gaus_higgs", "higgs_signal_distr", inv_mass, m_higgs, sigma_higgs);
-    RooAddPdf model ("model", "Higgs_composite_model", RooArgList(gaus_higgs, bkg_model), f_s);
+    RooAddPdf model ("model", "Higgs_composite_model", RooArgList(gaus_higgs, bkg_model), RooArgSet(f_s, f_b)); //SERVE IL COEFFICIENTE PER ENTRAMBI
 
     // Fitting, saving fit values and plotting
     RooFitResult * result = model.fitTo(inv_mass_dh, Save());
