@@ -22,7 +22,6 @@
 using namespace RooFit;
 using namespace RooStats;
 
-// Choose between profile likelihood calculator, 
 int higgs_CMS2(Int_t mode = 1) {
     //Declaring the observable
     Double_t low_lim = 70.;
@@ -42,8 +41,6 @@ int higgs_CMS2(Int_t mode = 1) {
     while(!f1.eof()) {
         f1 >> v >> w;
         if (v > low_lim && v < upp_lim) { // double-checking for underflow/overflow values 
-                                            // anche perchè altrimenti per n_bin < 37 eof salta ad ultimo valore  
-                                            // e lo assegna due volte a v prima di uscire dal loop
             inv_mass.setVal(v);
             inv_mass_dh.set(inv_mass, w);
         } else {
@@ -100,15 +97,6 @@ int higgs_CMS2(Int_t mode = 1) {
 
     RooAddPdf bkg_model ("bkg_model", "background_model", RooArgList(hpdf_ttbar, hpdf_DY, hpdf_ZZ), RooArgList(f_ttbar, f_DY));
 
-    // RooPlot *higgs1 = inv_mass.frame();
-    // ttbar_dh.plotOn(higgs1, Name("Data"));
-    // bkg_model.plotOn(higgs1, Name("Model Fit")); 
-    // bkg_model.plotOn(higgs1, Components(hpdf_ttbar), LineColor(kViolet-1), Name("tt"));
-    // bkg_model.plotOn(higgs1, Components(hpdf_DY), LineColor(kViolet-1), Name("dy"));
-    // bkg_model.plotOn(higgs1, Components(hpdf_ZZ), LineColor(kMagenta), Name("zz"));
-
-    // TCanvas *c = new TCanvas("c", "HIGGS", 1600, 800);
-    // higgs1->Draw();
 
     // Building signal + background model
     RooRealVar m_higgs ("m_higgs", "Higgs_mass", 125., 110., 140.);
@@ -116,7 +104,7 @@ int higgs_CMS2(Int_t mode = 1) {
     RooRealVar f_s ("f_s", "signal_fraction", 0.5, 0., 1.);
     RooFormulaVar f_b ("f_b", "1 -@0", f_s);
     RooGaussian gaus_higgs ("gaus_higgs", "higgs_signal_distr", inv_mass, m_higgs, sigma_higgs);
-    RooAddPdf model ("model", "Higgs_composite_model", RooArgList(gaus_higgs, bkg_model), RooArgSet(f_s, f_b)); //SERVE IL COEFFICIENTE PER ENTRAMBI
+    RooAddPdf model ("model", "Higgs_composite_model", RooArgList(gaus_higgs, bkg_model), RooArgSet(f_s, f_b)); 
 
     // Fitting, saving fit values and plotting
     RooFitResult * result = model.fitTo(inv_mass_dh, Save());
@@ -175,9 +163,61 @@ int higgs_CMS2(Int_t mode = 1) {
 
     ws.import(mc);
 
-    ws.writeToFile("higgs_CMS2.root", true);   
+    ws.writeToFile("higgs_CMS2.root", true);  
+
+    // get the modelConfig (S+B) out of the file
+    // and create the B model from the S+B model
+    mc.SetName("S+B Model");      
+    RooRealVar* poi = (RooRealVar*) mc.GetParametersOfInterest()->first(); // m_higgs
+    poi->setVal(200);  // set POI snapshot in S+B model for expected significance
+    mc.SetSnapshot(*poi);
+    ModelConfig * bModel = (ModelConfig*) mc.Clone();
+    bModel->SetName("B Model");      
+    poi->setVal(0);
+    bModel->SetSnapshot( *poi  );
+
+    vector<Double_t> masses;
+    vector<Double_t> p0values;
+    vector<Double_t> p0valuesExpected;
+
+    Double_t m_higgs_min = 112;
+    Double_t m_higgs_max = 158;
+
+    // Looping on mass values 
+    Int_t npoints = 30;
+
+    for( Double_t mass=m_higgs_min; mass<=m_higgs_max; mass += (m_higgs_max-m_higgs_min)/Double_t(npoints) )   {
+        cout << endl << endl << "Running for mass: " << mass << endl << endl;      
+        ws.var("m_higgs")->setVal(mass);
+
+        AsymptoticCalculator *  ac = new AsymptoticCalculator(inv_mass_dh, mc, *bModel);
+        ac->SetOneSidedDiscovery(true);  // for one-side discovery test                                      
+        AsymptoticCalculator::SetPrintLevel(-1);
 
 
+        HypoTestResult* asymCalcResult = ac->GetHypoTest();
+ 
+        asymCalcResult->Print();
+     
+        masses.push_back( mass );
+        p0values.push_back( asymCalcResult->NullPValue() );
+  
+        Double_t expectedP0 = AsymptoticCalculator::GetExpectedPValues(  asymCalcResult->NullPValue(),  asymCalcResult->AlternatePValue(), 0, false);
+        p0valuesExpected.push_back( expectedP0 );
+        std::cout << "expected p0 = " << expectedP0 << std::endl;   
+     }   
+     
+    TGraph * graph1  = new TGraph(masses.size(),&masses[0],&p0values[0]);   TGraph * graph2  = new TGraph(masses.size(),&masses[0],&p0valuesExpected[0]);   graph1->SetMarkerStyle(20);
+    graph1->Draw("APC");
+    graph2->SetLineStyle(2);
+    graph2->Draw("C");
+    graph1->GetXaxis()->SetTitle("mass");
+    graph1->GetYaxis()->SetTitle("p0 value");
+    graph1->SetTitle("Significance vs Mass");
+    graph1->SetMinimum(graph2->GetMinimum());
+    graph1->SetLineColor(kBlue);
+    graph2->SetLineColor(kRed);
+    gPad->SetLogy(true);
 
     return 0;
 }
