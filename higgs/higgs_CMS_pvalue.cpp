@@ -130,7 +130,7 @@ int higgs_CMS_pvalue(Int_t mode = 1) {
     leg1->AddEntry("Model Fit", "Signal + Background Fit", "LP");
    
     leg1->Draw("SAME");
-    c1->Print("higgs_stat.png");  
+    c1->Print("higgs_pvalue.png");  
 
    // result->Print("v"); 
 

@@ -22,46 +22,68 @@ using namespace RooStats;
 // Choose between single-channel and 4-independent channels mode, default single channel
 int OPERA(int channel_mode = 1) {
 
+   // Single channel
    if (channel_mode == 1) {
+    // Declaring the observables and the parameters for the counting model
     RooConstVar n_signal("n_signal", "nominal_signal", 2.64);
     RooConstVar sigma_b("sigma_b", "background_error", 0.05);
     RooRealVar nobs("nobs", "observed_events", 0., 10.);
     RooRealVar b("b", "background_events", 0.25, 0., 0.5);
     RooRealVar sig_strength("sig_strength", "#mu", 0.5, 0., 1.);
 
+    // Expected events
     RooFormulaVar nexp("nexp", "@0 * @1 + @2",
                        RooArgSet(sig_strength, n_signal, b));
 
+    // Defining the counting model
     RooPoisson model("model", "expected_events_distr", nobs, nexp);
 
+    // Setting a constraint on the background
+    // Background best estimate, auxiliary measurement
     RooRealVar b0("b0", "best_bg_estimate", 0.25, 0., 1.);
 
     RooGaussian bg_constraint("bg_gconstraint", "bg_gaussian_constraint", b0, b, sigma_b);
 
+    // Adding the constraint to the model
     RooProdPdf model_constraint("model_constraint", "model with constraint", RooArgSet(model, bg_constraint));
 
+    // Building the workspace
     RooWorkspace w("w");
 
     w.import(model_constraint);
 
+    // Defining the modelconfig (input for RooStats calculators) 
     ModelConfig mc("ModelConfig", &w);
-    mc.SetPdf(*w.pdf("model_constraint"));
+
+    // Setting pdf, parameters of interest and nuisance parameters
+    mc.SetPdf(*w.pdf("model_constraint")); 
     mc.SetParametersOfInterest(*w.var("sig_strength"));
     mc.SetObservables(*w.var("nobs"));
+
+    // Setting signal strength parameter value for a our hypothesis 
     mc.SetSnapshot(*w.var("sig_strength")); 
+
+    // Setting auxiliary meausurement as (constant) global observable
+    // b0 should be treated as auxiliary obs in frequenist stat and varied in pseudo exp
     mc.SetGlobalObservables("b0");
-    w.var("b0")->setConstant(true);   
+    w.var("b0")->setConstant(true);    
+
     w.import(mc);
 
+    // Building and importing dataset for nobs
     RooDataSet data("data", "", nobs);
     nobs.setVal(5);
     data.add(nobs);
     w.import(data);
+
+    // Importing workspace to root file
     w.writeToFile("OPERA_1.root", true);
   }
 
+  // 4-channels mode
   else if (channel_mode == 4) {
 
+   // Signal strength is the same for all channels
    RooRealVar sig_strength("sig_strength", "#mu", 0.5, 0., 1.); // one for all
 
    // first channel
@@ -138,7 +160,7 @@ int OPERA(int channel_mode = 1) {
     mc.SetObservables(RooArgSet(*w.var("nobs_1"), *w.var("nobs_2"), *w.var("nobs_3"), *w.var("nobs_4")));
     mc.SetSnapshot(*w.var("sig_strength"));   // needed for hypothesis test
     mc.SetGlobalObservables(RooArgSet(b0_1, b0_2, b0_3, b0_4)); // b0 should be treated as auxiliary obs in frequenist stat and varied in pseudo exp
-    w.var("b0_1")->setConstant(true);    // it has a range as glob obs, but it is const //potrebbe non servire perché è già const
+    w.var("b0_1")->setConstant(true);    // it has a range as glob obs, but it is const
     w.var("b0_2")->setConstant(true);   
     w.var("b0_3")->setConstant(true);    
     w.var("b0_4")->setConstant(true);    
