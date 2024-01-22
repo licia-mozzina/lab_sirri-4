@@ -79,7 +79,7 @@ void StandardFeldmanCousinsDemo(const char *infile = "", const char *workspaceNa
    // on the parameter of interest as specified
    // in the model config
    FeldmanCousins fc(*data, *mc);
-   fc.SetConfidenceLevel(0.95); // 95% interval
+   fc.SetConfidenceLevel(0.90); // 90% interval
    // fc.AdditionalNToysFactor(0.1); // to speed up the result
    fc.UseAdaptiveSampling(true); // speed it up a bit
    fc.SetNBins(10);              // set how many points per parameter of interest to scan

@@ -22,7 +22,6 @@
 using namespace RooFit;
 using namespace RooStats;
 
-// Choose between profile likelihood calculator, 
 int higgs_CMS(Int_t mode = 1) {
     //Declaring the observable
     Double_t low_lim = 70.;
@@ -42,8 +41,6 @@ int higgs_CMS(Int_t mode = 1) {
     while(!f1.eof()) {
         f1 >> v >> w;
         if (v > low_lim && v < upp_lim) { // double-checking for underflow/overflow values 
-                                            // anche perchè altrimenti per n_bin < 37 eof salta ad ultimo valore  
-                                            // e lo assegna due volte a v prima di uscire dal loop
             inv_mass.setVal(v);
             inv_mass_dh.set(inv_mass, w);
         } else {
@@ -100,15 +97,6 @@ int higgs_CMS(Int_t mode = 1) {
 
     RooAddPdf bkg_model ("bkg_model", "background_model", RooArgList(hpdf_ttbar, hpdf_DY, hpdf_ZZ), RooArgList(f_ttbar, f_DY));
 
-    // RooPlot *higgs1 = inv_mass.frame();
-    // ttbar_dh.plotOn(higgs1, Name("Data"));
-    // bkg_model.plotOn(higgs1, Name("Model Fit")); 
-    // bkg_model.plotOn(higgs1, Components(hpdf_ttbar), LineColor(kViolet-1), Name("tt"));
-    // bkg_model.plotOn(higgs1, Components(hpdf_DY), LineColor(kViolet-1), Name("dy"));
-    // bkg_model.plotOn(higgs1, Components(hpdf_ZZ), LineColor(kMagenta), Name("zz"));
-
-    // TCanvas *c = new TCanvas("c", "HIGGS", 1600, 800);
-    // higgs1->Draw();
 
     // Building signal + background model
     RooRealVar m_higgs ("m_higgs", "Higgs_mass", 125., 110., 140.);
@@ -116,14 +104,14 @@ int higgs_CMS(Int_t mode = 1) {
     RooRealVar f_s ("f_s", "signal_fraction", 0.5, 0., 1.);
     RooFormulaVar f_b ("f_b", "1 -@0", f_s);
     RooGaussian gaus_higgs ("gaus_higgs", "higgs_signal_distr", inv_mass, m_higgs, sigma_higgs);
-    RooAddPdf model ("model", "Higgs_composite_model", RooArgList(gaus_higgs, bkg_model), RooArgSet(f_s, f_b)); //SERVE IL COEFFICIENTE PER ENTRAMBI
+    RooAddPdf model ("model", "Higgs_composite_model", RooArgList(gaus_higgs, bkg_model), RooArgSet(f_s, f_b)); 
 
     // Fitting, saving fit values and plotting
     RooFitResult * result = model.fitTo(inv_mass_dh, Save());
 
     RooPlot *higgs = inv_mass.frame();
     higgs->SetTitle("4 leptons invariant mass");
-    higgs->GetXaxis()->SetTitle("m_{4l} [MeV/c^{2}]");
+    higgs->GetXaxis()->SetTitle("m_{4l} [GeV/c^{2}]");
     higgs->GetYaxis()->SetTitle("Events / 3 GeV");
     inv_mass_dh.plotOn(higgs, Name("Data"));
     model.plotOn(higgs, Components(gaus_higgs), LineColor(kRed), Name("Signal"));
@@ -144,10 +132,9 @@ int higgs_CMS(Int_t mode = 1) {
     leg1->AddEntry("Bkg", "Background", "L");
     leg1->AddEntry("Model Fit", "Signal + Background Fit", "LP");
    
-    leg1->Draw("SAME");
-    c1->Print("higgs.png");  
+    leg1->Draw("SAME"); 
 
-   // result->Print("v"); 
+    c1->Print("higgs_CMS.png"); 
 
     //Writing fit results to txt file 
     ofstream myfile;
@@ -157,54 +144,112 @@ int higgs_CMS(Int_t mode = 1) {
 
 
 
-    // Creating the ModelConfig 
+    // Creating the the workspace and the ModelConfig 
     RooWorkspace ws ("ws", "Workspace");
 
     ModelConfig mc ("mc", "ModelConfig", &ws);
 
     ws.import(model);
     ws.import(inv_mass_dh);
-//    mc.SetParametersOfInterest(RooArgSet(*ws.pdf("model"), *ws.var("inv_mass"), *ws.var("m_higgs")));
-//    mc.SetNuisanceParameters(*ws.var("f_s"));
 
+    // Defining pdf, parameters of interest and nuisance parameters
     mc.SetPdf(*ws.pdf("model"));
     ws.defineSet("POI","m_higgs");
     ws.defineSet("nuisP","f_s"); 
-    mc.SetParametersOfInterest(*ws.var("m_higgs"));
-    mc.SetNuisanceParameters(*ws.var("f_s"));
+    // ws.defineSet("POI","f_s");           // for computing p-values and significance of f_s as signal strength, null hypothesis f_s = 0
+    // ws.defineSet("nuisP","m_higgs"); 
+    mc.SetParametersOfInterest(*ws.set("POI"));
+    mc.SetNuisanceParameters(*ws.set("nuisP"));
     mc.SetObservables("inv_mass");
 
     ws.import(mc);
 
-    ws.writeToFile("higgs_CMS.root", true);
+    ws.writeToFile("higgs_CMS.root", true);  
 
 
-    //Profile Likelihood 95% confidence interval  
-    ProfileLikelihoodCalculator plc(inv_mass_dh,mc);
-    plc.SetConfidenceLevel(0.95); // 90% interval
-    LikelihoodInterval* interval = plc.GetInterval();
+    //***************************************************
+    // Computing significance (p-value) as function of the signal mass
+    //***************************************************
 
-    RooRealVar* firstPOI = (RooRealVar*) mc.GetParametersOfInterest()->first();
-    double lowerLimit = interval->LowerLimit(*firstPOI);
-    double upperLimit = interval->UpperLimit(*firstPOI);
-
-    cout << "\n95 % interval on " <<firstPOI->GetName()<<" is : ["<<     lowerLimit << ", "<<     upperLimit <<"] "<<endl; 
-
-    //FeldmanCousins
-    FeldmanCousins fc (inv_mass_dh, mc);
-    //fc.SetConfidenceLevel(0.90);        // quello sopra lo definisce per tutti 
-    fc.SetPdf(model);
-    fc.SetData(inv_mass_dh); 
-    fc.SetParameters(m_higgs);
-    fc.UseAdaptiveSampling(true);
-    fc.FluctuateNumDataEntries(false);
-    fc.SetNBins(100); // number of points to test per parameter
-    fc.SetTestSize(.1);
-    ConfInterval * fcint = fc.GetInterval();
-
+    // ModelConfig corresponds to signal + background model
+    mc.SetName("S+B Model");      
+    RooRealVar* poi = (RooRealVar*) mc.GetParametersOfInterest()->first(); // m_higgs
     
+    // Setting POI snapshot in S+B model for expected significance
+    poi->setVal(200);  
+    mc.SetSnapshot(*poi);
+
+    // Creating the B model from the S+B model
+    ModelConfig * bModel = (ModelConfig*) mc.Clone();
+    bModel->SetName("B Model");      
+    poi->setVal(0);
+    bModel->SetSnapshot(*poi);
+
+    // Storing for mass values
+    vector<Double_t> masses;
+    vector<Double_t> p0values;
+    vector<Double_t> p0valuesExpected;
+
+    // Setting lower/upper bound for mass values
+    Double_t m_higgs_min = 112;
+    Double_t m_higgs_max = 158;
+
+    // Looping on mass values 
+    Int_t npoints = 30;
+
+    for( Double_t mass=m_higgs_min; mass<=m_higgs_max; mass += (m_higgs_max-m_higgs_min)/Double_t(npoints) )   {
+        cout << endl << endl << "Running for mass: " << mass << endl << endl;      
+        ws.var("m_higgs")->setVal(mass);
+
+        // Asymptotic calculator for the likelihood
+        AsymptoticCalculator *  ac = new AsymptoticCalculator(inv_mass_dh, mc, *bModel);
+        ac->SetOneSidedDiscovery(true);  // for one-side discovery test                                      
+        AsymptoticCalculator::SetPrintLevel(-1);
 
 
+        HypoTestResult* asymCalcResult = ac->GetHypoTest();
+ 
+        asymCalcResult->Print();
+     
+        masses.push_back( mass );
+
+        // P-values for null hypothesis
+        p0values.push_back( asymCalcResult->NullPValue() );
+
+        // Retrieving expected p-values
+        Double_t expectedP0 = AsymptoticCalculator::GetExpectedPValues(  asymCalcResult->NullPValue(),  asymCalcResult->AlternatePValue(), 0, false);
+        p0valuesExpected.push_back( expectedP0 );
+        std::cout << "expected p0 = " << expectedP0 << std::endl;   
+     }   
+     
+    //Plotting p-values
+    TCanvas *c2 = new TCanvas("c2", "HIGGS", 1600, 800);
+
+    TGraph * graph1  = new TGraph(masses.size(),&masses[0],&p0values[0]);   
+    TGraph * graph2  = new TGraph(masses.size(),&masses[0],&p0valuesExpected[0]);   
+    graph1->SetMarkerStyle(20);
+    graph1->Draw("APC");
+    graph2->SetLineStyle(2);
+    graph2->Draw("SAME C");
+    graph1->GetXaxis()->SetTitle("Mass [GeV/c^{2}]");
+    graph1->GetYaxis()->SetTitle("p0 value");
+    graph1->GetYaxis()->SetLimits(-1, 0.2);
+    graph1->SetTitle("Significance vs Mass");
+    graph1->SetMinimum(graph2->GetMinimum());
+    graph1->SetLineColor(kBlue);
+    graph2->SetLineColor(kRed);
+    graph2->SetLineWidth(3);
+    gPad->SetLogy(true);
+
+    TLegend *leg2 = new TLegend(0.70, 0.67, 0.85, 0.82);
+    leg2->SetFillColor(kWhite);
+    leg2->SetLineColor(kBlack);
+    leg2->AddEntry(graph1, "Observed p-values", "P");
+    leg2->AddEntry(graph2, "Expected p-values", "L");
+   
+    leg2->Draw("SAME"); 
+
+    c2->Print("p0_values.png");
 
     return 0;
 }

@@ -1,4 +1,480 @@
- StandardHypoTestDemo("OPERA_1.root", "w", "ModelConfig", "", "data", 2, 3, 1000, true)
-  StandardFeldmanCousinsDemo("higgs_CMS_pl_fc.root", "ws", "mc", "inv_mass_dh")
-   StandardHypoTestDemo("higgs_CMS.root", "ws", "mc", "", "inv_mass_dh", 2, 3, 1000, true)
- StandardProfileLikelihoodDemo("higgs_CMS.root", "ws", "mc", "inv_mass_dh")
+StandardHypoTestDemo("OPERA_1.root", "w", "ModelConfig", "", "data", 2, 3, 1000, true)
+StandardFeldmanCousinsDemo("higgs_CMS.root", "ws", "mc", "inv_mass_dh")
+StandardHypoTestDemo("higgs_CMS.root", "ws", "mc", "", "inv_mass_dh", 2, 3, 1000, true)
+StandardProfileLikelihoodDemo("higgs_CMS.root", "ws", "mc", "inv_mass_dh")
+
+higgs_CMS.cpp:
+1) 95% CL profile likelihood (poi = m_higgs, nuisP = f_s)
+      RooFitResult: minimized FCN value: 439.008, estimated distance to minimum: 1.3423e-10
+                covariance matrix quality: Full, accurate covariance matrix
+                Status : MINIMIZE=0
+
+        Floating Parameter    FinalValue +/-  Error
+    --------------------  --------------------------
+                       f_s    7.7576e-02 +/-  3.73e-02
+                   m_higgs    1.2383e+02 +/-  1.40e+00
+
+
+        >>>> RESULT : 95% interval on m_higgs is : [120.664, 126.963]
+
+2) 90% CL Feldman Cousins (poi = m_higgs, nuisP = f_s)
+    === Using the following for mc ===
+    Observables:             RooArgSet:: = (inv_mass)
+    Parameters of Interest:  RooArgSet:: = (m_higgs)
+    Nuisance Parameters:     RooArgSet:: = (f_s)
+    PDF:                     RooAddPdf::model[ f_s * gaus_higgs + f_b * bkg_model ] = 0.818647/1
+
+    FeldmanCousins: ntoys per point: adaptive
+    FeldmanCousins: nEvents per toy will fluctuate about  expectation
+    FeldmanCousins: Model has nuisance parameters, will do profile construction
+    FeldmanCousins: # points to test = 10
+    lookup index = 0
+    NeymanConstruction: Prog: 1/10 total MC = 40 this test stat = -1.37513e-07
+     m_higgs=111.5 f_s=3.26084e-06 [-1e+30, 1.1348]  in interval = 1
+
+    NeymanConstruction: Prog: 2/10 total MC = 40 this test stat = 3.24673
+     m_higgs=114.5 f_s=2.7655e-08 [-1e+30, 1.23218]  in interval = 0
+
+    NeymanConstruction: Prog: 3/10 total MC = 40 this test stat = 3.24069
+     m_higgs=117.5 f_s=0.00297929 [-1e+30, 1.41728]  in interval = 0
+
+    NeymanConstruction: Prog: 4/10 total MC = 120 this test stat = 2.05235
+     m_higgs=120.5 f_s=0.0458767 [-1e+30, 1.59503]  in interval = 0
+
+    NeymanConstruction: Prog: 5/10 total MC = 40 this test stat = 0.0284499
+     m_higgs=123.5 f_s=0.0777254 [-1e+30, 3.17176]  in interval = 1
+
+    NeymanConstruction: Prog: 6/10 total MC = 40 this test stat = 1.48623
+     m_higgs=126.5 f_s=0.054052 [-1e+30, 3.32046]  in interval = 1
+
+    NeymanConstruction: Prog: 7/10 total MC = 40 this test stat = 3.24672
+     m_higgs=129.5 f_s=1.98198e-07 [-1e+30, 0.639269]  in interval = 0
+
+    NeymanConstruction: Prog: 8/10 total MC = 120 this test stat = 3.24673
+     m_higgs=132.5 f_s=3.79807e-13 [-1e+30, 2.08779]  in interval = 0
+
+    NeymanConstruction: Prog: 9/10 total MC = 40 this test stat = 0.744556
+     m_higgs=135.5 f_s=8.5076e-10 [-1e+30, 1.48316]  in interval = 1
+
+    NeymanConstruction: Prog: 10/10 total MC = 360 this test stat = 0.578349
+     m_higgs=138.5 f_s=0.0149904 [-1e+30, 1.09231]  in interval = 1
+
+    90% interval on m_higgs is : [111.5, 138.5]
+
+3) p-value and significance (poi = f_s, nuisP = m_higgs)
+    [#0] PROGRESS:Eval -- Best fitted POI value = 0.0775758 +/- 0.037292
+    [#0] PROGRESS:Eval -- AsymptoticCalculator: Building Asimov data Set
+    [#1] INFO:InputArguments -- AsymptoticCalculator: Asimov data will be generated using fitted nuisance parameter values
+    [#0] PROGRESS:Eval -- AsymptoticCalculator::Initialize Find  best conditional NLL on ASIMOV data set for given alt POI ( f_s ) = 0.0775728
+
+    Results HypoTestAsymptotic_result:
+    - Null p-value = 0.00541361
+    - Significance = 2.54823
+    - CL_b: 0.00541361
+    - CL_s+b: 0.0106461
+    - CL_s: 1.96655
+    Asymptotic results
+    Expected p -value and significance at -2 sigma = 0.960331 significance -1.75454 sigma
+    Expected p -value and significance at -1 sigma = 0.774736 significance -0.754535 sigma
+    Expected p -value and significance at 0 sigma = 0.403048 significance 0.245465 sigma
+    Expected p -value and significance at 1 sigma = 0.10648 significance 1.24546 sigma
+    Expected p -value and significance at 2 sigma = 0.0123692 significance 2.24546 sigma
+
+4) p-value and significance as function of the signal mass (poi = m_higgs, nuisP = f_s)
+    Results HypoTestAsymptotic_result:
+ - Null p-value = 0.0054136
+ - Significance = 2.54823
+ - CL_b: 0.0054136
+ - CL_s+b: 0.00764972
+ - CL_s: 1.41306
+expected p0 = 0.451048
+
+
+Running for mass: 113.533
+
+[#0] PROGRESS:Eval -- AsymptoticCalculator: Building Asimov data Set
+
+Results HypoTestAsymptotic_result:
+ - Null p-value = 0.5
+ - Significance = -0
+ - CL_b: 0.5
+ - CL_s+b: 0.548945
+ - CL_s: 1.09789
+expected p0 = 0.451055
+
+
+Running for mass: 115.067
+
+[#0] PROGRESS:Eval -- AsymptoticCalculator: Building Asimov data Set
+
+Results HypoTestAsymptotic_result:
+ - Null p-value = 0.00541358
+ - Significance = 2.54823
+ - CL_b: 0.00541358
+ - CL_s+b: 0.00764969
+ - CL_s: 1.41306
+expected p0 = 0.451048
+
+
+Running for mass: 116.6
+
+[#0] PROGRESS:Eval -- AsymptoticCalculator: Building Asimov data Set
+
+Results HypoTestAsymptotic_result:
+ - Null p-value = 0.0054137
+ - Significance = 2.54822
+ - CL_b: 0.0054137
+ - CL_s+b: 0.00764986
+ - CL_s: 1.41306
+expected p0 = 0.451048
+
+
+Running for mass: 118.133
+
+[#0] PROGRESS:Eval -- AsymptoticCalculator: Building Asimov data Set
+
+Results HypoTestAsymptotic_result:
+ - Null p-value = 0.00541358
+ - Significance = 2.54823
+ - CL_b: 0.00541358
+ - CL_s+b: 0.00764969
+ - CL_s: 1.41306
+expected p0 = 0.451048
+
+
+Running for mass: 119.667
+
+[#0] PROGRESS:Eval -- AsymptoticCalculator: Building Asimov data Set
+
+Results HypoTestAsymptotic_result:
+ - Null p-value = 0.00541358
+ - Significance = 2.54823
+ - CL_b: 0.00541358
+ - CL_s+b: 0.00764969
+ - CL_s: 1.41306
+expected p0 = 0.451048
+
+
+Running for mass: 121.2
+
+[#0] PROGRESS:Eval -- AsymptoticCalculator: Building Asimov data Set
+
+Results HypoTestAsymptotic_result:
+ - Null p-value = 0.00541358
+ - Significance = 2.54823
+ - CL_b: 0.00541358
+ - CL_s+b: 0.00764969
+ - CL_s: 1.41306
+expected p0 = 0.451048
+
+
+Running for mass: 122.733
+
+[#0] PROGRESS:Eval -- AsymptoticCalculator: Building Asimov data Set
+
+Results HypoTestAsymptotic_result:
+ - Null p-value = 0.00541376
+ - Significance = 2.54822
+ - CL_b: 0.00541376
+ - CL_s+b: 0.00764994
+ - CL_s: 1.41305
+expected p0 = 0.451048
+
+
+Running for mass: 124.267
+
+[#0] PROGRESS:Eval -- AsymptoticCalculator: Building Asimov data Set
+
+Results HypoTestAsymptotic_result:
+ - Null p-value = 0.00541358
+ - Significance = 2.54823
+ - CL_b: 0.00541358
+ - CL_s+b: 0.00764969
+ - CL_s: 1.41306
+expected p0 = 0.451048
+
+
+Running for mass: 125.8
+
+[#0] PROGRESS:Eval -- AsymptoticCalculator: Building Asimov data Set
+
+Results HypoTestAsymptotic_result:
+ - Null p-value = 0.00541359
+ - Significance = 2.54823
+ - CL_b: 0.00541359
+ - CL_s+b: 0.00764971
+ - CL_s: 1.41306
+expected p0 = 0.451048
+
+
+Running for mass: 127.333
+
+[#0] PROGRESS:Eval -- AsymptoticCalculator: Building Asimov data Set
+
+Results HypoTestAsymptotic_result:
+ - Null p-value = 0.00541358
+ - Significance = 2.54823
+ - CL_b: 0.00541358
+ - CL_s+b: 0.00764969
+ - CL_s: 1.41306
+expected p0 = 0.451048
+
+
+Running for mass: 128.867
+
+[#0] PROGRESS:Eval -- AsymptoticCalculator: Building Asimov data Set
+
+Results HypoTestAsymptotic_result:
+ - Null p-value = 0.00541361
+ - Significance = 2.54823
+ - CL_b: 0.00541361
+ - CL_s+b: 0.00764973
+ - CL_s: 1.41306
+expected p0 = 0.451048
+
+
+Running for mass: 130.4
+
+[#0] PROGRESS:Eval -- AsymptoticCalculator: Building Asimov data Set
+
+Results HypoTestAsymptotic_result:
+ - Null p-value = 0.00541365
+ - Significance = 2.54822
+ - CL_b: 0.00541365
+ - CL_s+b: 0.00764979
+ - CL_s: 1.41306
+expected p0 = 0.451048
+
+
+Running for mass: 131.933
+
+[#0] PROGRESS:Eval -- AsymptoticCalculator: Building Asimov data Set
+
+Results HypoTestAsymptotic_result:
+ - Null p-value = 0.00541358
+ - Significance = 2.54823
+ - CL_b: 0.00541358
+ - CL_s+b: 0.00764969
+ - CL_s: 1.41306
+expected p0 = 0.451048
+
+
+Running for mass: 133.467
+
+[#0] PROGRESS:Eval -- AsymptoticCalculator: Building Asimov data Set
+
+Results HypoTestAsymptotic_result:
+ - Null p-value = 0.111177
+ - Significance = 1.22029
+ - CL_b: 0.111177
+ - CL_s+b: 0.136256
+ - CL_s: 1.22558
+expected p0 = 0.451054
+
+
+Running for mass: 135
+
+[#0] PROGRESS:Eval -- AsymptoticCalculator: Building Asimov data Set
+
+Results HypoTestAsymptotic_result:
+ - Null p-value = 0.111177
+ - Significance = 1.22029
+ - CL_b: 0.111177
+ - CL_s+b: 0.136256
+ - CL_s: 1.22558
+expected p0 = 0.451054
+
+
+Running for mass: 136.533
+
+[#0] PROGRESS:Eval -- AsymptoticCalculator: Building Asimov data Set
+
+Results HypoTestAsymptotic_result:
+ - Null p-value = 0.00541359
+ - Significance = 2.54823
+ - CL_b: 0.00541359
+ - CL_s+b: 0.0076497
+ - CL_s: 1.41306
+expected p0 = 0.451048
+
+
+Running for mass: 138.067
+
+[#0] PROGRESS:Eval -- AsymptoticCalculator: Building Asimov data Set
+
+Results HypoTestAsymptotic_result:
+ - Null p-value = 0.111177
+ - Significance = 1.22029
+ - CL_b: 0.111177
+ - CL_s+b: 0.136256
+ - CL_s: 1.22558
+expected p0 = 0.451054
+
+
+Running for mass: 139.6
+
+[#0] PROGRESS:Eval -- AsymptoticCalculator: Building Asimov data Set
+
+Results HypoTestAsymptotic_result:
+ - Null p-value = 0.111177
+ - Significance = 1.22029
+ - CL_b: 0.111177
+ - CL_s+b: 0.136256
+ - CL_s: 1.22559
+expected p0 = 0.451053
+
+
+Running for mass: 141.133
+
+[#0] PROGRESS:Eval -- AsymptoticCalculator: Building Asimov data Set
+
+Results HypoTestAsymptotic_result:
+ - Null p-value = 0.111177
+ - Significance = 1.22029
+ - CL_b: 0.111177
+ - CL_s+b: 0.136256
+ - CL_s: 1.22558
+expected p0 = 0.451054
+
+
+Running for mass: 142.667
+
+[#0] PROGRESS:Eval -- AsymptoticCalculator: Building Asimov data Set
+
+Results HypoTestAsymptotic_result:
+ - Null p-value = 0.111177
+ - Significance = 1.22029
+ - CL_b: 0.111177
+ - CL_s+b: 0.136256
+ - CL_s: 1.22558
+expected p0 = 0.451054
+
+
+Running for mass: 144.2
+
+[#0] PROGRESS:Eval -- AsymptoticCalculator: Building Asimov data Set
+
+Results HypoTestAsymptotic_result:
+ - Null p-value = 0.111177
+ - Significance = 1.22029
+ - CL_b: 0.111177
+ - CL_s+b: 0.136256
+ - CL_s: 1.22558
+expected p0 = 0.451054
+
+
+Running for mass: 145.733
+
+[#0] PROGRESS:Eval -- AsymptoticCalculator: Building Asimov data Set
+
+Results HypoTestAsymptotic_result:
+ - Null p-value = 0.111177
+ - Significance = 1.22029
+ - CL_b: 0.111177
+ - CL_s+b: 0.136256
+ - CL_s: 1.22558
+expected p0 = 0.451054
+
+
+Running for mass: 147.267
+
+[#0] PROGRESS:Eval -- AsymptoticCalculator: Building Asimov data Set
+
+Results HypoTestAsymptotic_result:
+ - Null p-value = 0.111177
+ - Significance = 1.22029
+ - CL_b: 0.111177
+ - CL_s+b: 0.136256
+ - CL_s: 1.22558
+expected p0 = 0.451054
+
+
+Running for mass: 148.8
+
+[#0] PROGRESS:Eval -- AsymptoticCalculator: Building Asimov data Set
+
+Results HypoTestAsymptotic_result:
+ - Null p-value = 0.111177
+ - Significance = 1.22029
+ - CL_b: 0.111177
+ - CL_s+b: 0.136256
+ - CL_s: 1.22558
+expected p0 = 0.451054
+
+
+Running for mass: 150.333
+
+[#0] PROGRESS:Eval -- AsymptoticCalculator: Building Asimov data Set
+
+Results HypoTestAsymptotic_result:
+ - Null p-value = 0.111177
+ - Significance = 1.22029
+ - CL_b: 0.111177
+ - CL_s+b: 0.136256
+ - CL_s: 1.22558
+expected p0 = 0.451054
+
+
+Running for mass: 151.867
+
+[#0] PROGRESS:Eval -- AsymptoticCalculator: Building Asimov data Set
+
+Results HypoTestAsymptotic_result:
+ - Null p-value = 0.111177
+ - Significance = 1.22029
+ - CL_b: 0.111177
+ - CL_s+b: 0.136256
+ - CL_s: 1.22558
+expected p0 = 0.451054
+
+
+Running for mass: 153.4
+
+[#0] PROGRESS:Eval -- AsymptoticCalculator: Building Asimov data Set
+
+Results HypoTestAsymptotic_result:
+ - Null p-value = 0.111177
+ - Significance = 1.22029
+ - CL_b: 0.111177
+ - CL_s+b: 0.136256
+ - CL_s: 1.22558
+expected p0 = 0.451054
+
+
+Running for mass: 154.933
+
+[#0] PROGRESS:Eval -- AsymptoticCalculator: Building Asimov data Set
+
+Results HypoTestAsymptotic_result:
+ - Null p-value = 0.111177
+ - Significance = 1.22029
+ - CL_b: 0.111177
+ - CL_s+b: 0.136256
+ - CL_s: 1.22558
+expected p0 = 0.451054
+
+
+Running for mass: 156.467
+
+[#0] PROGRESS:Eval -- AsymptoticCalculator: Building Asimov data Set
+
+Results HypoTestAsymptotic_result:
+ - Null p-value = 0.111177
+ - Significance = 1.22029
+ - CL_b: 0.111177
+ - CL_s+b: 0.136256
+ - CL_s: 1.22558
+expected p0 = 0.451054
+
+
+Running for mass: 158
+
+[#0] PROGRESS:Eval -- AsymptoticCalculator: Building Asimov data Set
+
+Results HypoTestAsymptotic_result:
+ - Null p-value = 0.111177
+ - Significance = 1.22029
+ - CL_b: 0.111177
+ - CL_s+b: 0.136256
+ - CL_s: 1.22558
+expected p0 = 0.451054
