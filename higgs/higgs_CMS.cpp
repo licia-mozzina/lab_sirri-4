@@ -14,8 +14,6 @@
 #include "TH2.h"
 #include "TStyle.h"
 
-#include "RooStats/ModelConfig.h"
-#include "RooStats/FeldmanCousins.h"
 
 #include <iostream>
 
