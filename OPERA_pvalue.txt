@@ -1,0 +1,32 @@
+*****************************************************************************************
+Single channel
+
+Results HypoTestAsymptotic_result:
+ - Null p-value = 8.79945e-06
+ - Significance = 4.29336
+ - CL_b: 8.79945e-06
+ - CL_s+b: 0.00558252
+ - CL_s: 634.417
+Asymptotic results
+ Expected p -value and significance at -2 sigma = 0.596435 significance -0.24413 sigma
+ Expected p -value and significance at -1 sigma = 0.224864 significance 0.75587 sigma
+ Expected p -value and significance at 0 sigma = 0.0395553 significance 1.75587 sigma
+ Expected p -value and significance at 1 sigma = 0.00292681 significance 2.75587 sigma
+ Expected p -value and significance at 2 sigma = 8.63702e-05 significance 3.75587 sigma
+
+ *****************************************************************************************
+
+4 independent channels
+
+Results HypoTestAsymptotic_result:
+ - Null p-value = 6.54922e-07
+ - Significance = 4.83825
+ - CL_b: 6.54922e-07
+ - CL_s+b: 0.00371996
+ - CL_s: 5680.01
+Asymptotic results
+ Expected p -value and significance at -2 sigma = 0.435743 significance 0.161771 sigma
+ Expected p -value and significance at -1 sigma = 0.122664 significance 1.16177 sigma
+ Expected p -value and significance at 0 sigma = 0.0153179 significance 2.16177 sigma
+ Expected p -value and significance at 1 sigma = 0.000784064 significance 3.16177 sigma
+ Expected p -value and significance at 2 sigma = 1.57894e-05 significance 4.16177 sigma
